@@ -1,8 +1,9 @@
 import regex as re
 from load import DocumentLoader
+import pandas as pd 
 
 class TextProcessor:
-    def __init__(self, data = DocumentLoader("data.xlsx")):
+    def __init__(self, data= pd.DataFrame):
         self.data = data
         
     def removing_anomalies(self) -> str:
@@ -35,6 +36,21 @@ class TextProcessor:
         cleaned_text = cleaned_text.lower()
 
         return cleaned_text
+
+
+    def remove_stopwords(self, stopwords: list) -> str:
+        cleaned_text = self.data
+        for stopword in stopwords:
+            cleaned_text = re.sub(r'\b' + re.escape(stopword) + r'\b', '', cleaned_text)
+        return cleaned_text
+
+
+
+    
+
+    
+
+    
 # #TDL 
 # PYDANTIC'
 # CONVERT TO LLM 
