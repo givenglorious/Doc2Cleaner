@@ -45,7 +45,7 @@ textcleaner/
 from textcleaner import CleaningPipeline
 
 # 1. Load your scraped file
-pipeline = CleaningPipeline("data.xlsx")
+pipeline = CleaningPipeline("YOUR_FILE")
 
 # 2. See what columns are available, and which ones look like text
 pipeline.preview_columns()
@@ -55,7 +55,7 @@ pipeline.preview_columns()
 # 3. Run the cleaning pipeline
 result = pipeline.run(
     text_columns=["target"],              # columns whose text should be cleaned
-    drop_columns=["text_2", "text_2"],  # columns you don't need
+    drop_columns=["columns_1", "columns_2"],  # columns you don't need
     output_path="cleaned.xlsx",          # where to save the result
 )
 
