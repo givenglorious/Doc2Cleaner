@@ -54,8 +54,8 @@ pipeline.preview_columns()
 
 # 3. Run the cleaning pipeline
 result = pipeline.run(
-    text_columns=["tweet"],              # columns whose text should be cleaned
-    drop_columns=["user_id", "retweet_count"],  # columns you don't need
+    text_columns=["target"],              # columns whose text should be cleaned
+    drop_columns=["text_2", "text_2"],  # columns you don't need
     output_path="cleaned.xlsx",          # where to save the result
 )
 
