@@ -13,5 +13,5 @@ class ColumnCleaner:
         existing = [c for c in columns if c in self.df.columns]
         missing = [c for c in columns if c not in self.df.columns]
         if missing:
-            print(f"[ColumnCleaner] Kolom tidak ditemukan, dilewati: {missing}")
+            print(f"[ColumnCleaner] column not found, skipping: {missing}")
         return self.df.drop(columns=existing)
