@@ -1,4 +1,4 @@
-# textcleaner
+# Doc2Cleaner
 
 A lightweight Python library for cleaning messy scraped data (from Twitter/X, Instagram, or any raw dataset) and turning it into a tidy, structured spreadsheet ready for further analysis.
 
