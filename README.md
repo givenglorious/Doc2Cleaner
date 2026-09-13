@@ -1,151 +1,172 @@
-# textcleaner
+<p align="center">
+  <img src="assets/banner.png" alt="doc2cleaner" width="100%" />
+</p>
 
-A lightweight Python library for cleaning messy scraped data (from Twitter/X, Instagram, or any raw dataset) and turning it into a tidy, structured spreadsheet ready for further analysis.
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-2ea44f" alt="License: MIT"></a>
+  <a href="https://github.com/givenglorious/doc2cleaner/releases"><img src="https://img.shields.io/github/v/release/givenglorious/doc2cleaner?label=version&color=1f6feb" alt="Version"></a>
+  <img src="https://img.shields.io/badge/python-3.9%2B-blue" alt="Python 3.9+">
+  <img src="https://img.shields.io/badge/pandas-2.0%2B-150458" alt="Pandas">
+</p>
 
-## Why this library exists
+# doc2cleaner
 
-Data collected through web scraping is almost never clean. It's usually full of URLs, mentions, hashtags, emojis, symbols, extra whitespace, and repeated characters (`ayoooo`, `bagusss`), scattered across dozens of inconsistent columns depending on the source.
+> **Stop rewriting the same cleaning logic. Start cleaning.**
+>
+> A lightweight Python library for cleaning messy scraped data — from Twitter/X, Instagram, or any raw dataset — and turning it into a tidy, structured spreadsheet ready for NLP analysis.
 
-**textcleaner** was built to remove that friction. Instead of rewriting the same regex cleaning logic for every new scraping project, this library gives you:
+---
 
-- A consistent, reusable way to **load** raw `.xlsx`/`.csv` files
-- A simple way to **inspect and drop unnecessary columns** (scraped data often has 10+ irrelevant fields like `user_id`, `retweet_count`, `profile_url`, etc.)
-- A **text cleaning pipeline** that strips out noise (links, mentions, hashtags, emojis, numbers, symbols, repeated letters) so the text is ready for downstream NLP work
-- A single **orchestration class** (`CleaningPipeline`) that ties everything together and exports a clean spreadsheet
+## Why this exists
 
-This is especially useful as a preprocessing step for **sentiment analysis, text classification, topic modeling**, or any NLP project where the model needs clean, normalized text rather than raw social media noise.
+Scraped data is never clean. URLs, mentions, hashtags, emojis, repeated characters (`ayoooo`, `bagusss`), and dozens of irrelevant columns — all before you've even started the actual analysis.
+
+`doc2cleaner` removes that friction with a consistent, reusable pipeline so you spend less time on preprocessing and more time on the work that matters.
+
+---
+
+## What it does
+
+- **Loads** raw `.xlsx` and `.csv` files into a clean DataFrame
+- **Inspects and drops** unnecessary columns (scraped data often has 10+ irrelevant fields)
+- **Cleans text** — strips URLs, mentions, hashtags, emojis, symbols, numbers, and repeated characters
+- **Exports** a clean spreadsheet ready for sentiment analysis, classification, or topic modeling
+- **CLI support** — run the full pipeline interactively without writing a script
+
+---
 
 ## Installation
 
 ```bash
-unzip textcleaner.zip -d textcleaner
-cd textcleaner
+unzip doc2cleaner.zip -d doc2cleaner
+cd doc2cleaner
 pip install -e .
 ```
 
-This installs the package in editable mode, along with its dependencies (`pandas`, `openpyxl`).
+Installs in editable mode with dependencies: `pandas`, `openpyxl`.
 
-## Project structure
+---
 
-```
-textcleaner/
-├── pyproject.toml
-├── cli.py                     # interactive command-line usage
-└── textcleaner/
-    ├── __init__.py             # public exports
-    ├── loader.py                 # DocumentLoader — loads .xlsx / .csv into a DataFrame
-    ├── columns.py                  # ColumnCleaner — inspect / drop columns
-    ├── cleaner.py                    # TextCleaner — regex-based text cleaning
-    └── pipeline.py                    # CleaningPipeline — orchestrates the whole flow
-```
-
-## Quick start
+## Quick Start
 
 ```python
 from textcleaner import CleaningPipeline
 
-# 1. Load your scraped file
-pipeline = CleaningPipeline("YOUR_FILE")
-
-# 2. See what columns are available, and which ones look like text
+pipeline = CleaningPipeline("data.xlsx")
 pipeline.preview_columns()
-# Kolom tersedia   : ['username', 'tweet', 'user_id', 'retweet_count', 'created_at']
-# Kandidat teks    : ['username', 'tweet']
 
-# 3. Run the cleaning pipeline
 result = pipeline.run(
-    text_columns=["target"],              # columns whose text should be cleaned
-    drop_columns=["columns_1", "columns_2"],  # columns you don't need
-    output_path="cleaned.xlsx",          # where to save the result
+    text_columns=["tweet"],
+    drop_columns=["user_id", "retweet_count"],
+    output_path="cleaned.xlsx",
 )
-
-print(result.head())
 ```
 
-This produces a new file `cleaned.xlsx` with:
-- The unnecessary columns removed
-- A new `tweet_cleaned` column containing the cleaned text (the original `tweet` column is preserved unless you set `overwrite_original=True`)
+Output: a new `cleaned.xlsx` with unnecessary columns removed and a `tweet_cleaned` column containing normalized text.
 
-## Command-line usage
+---
 
-If you don't want to write a script, use the interactive CLI:
+## CLI Usage
 
 ```bash
 python cli.py data.xlsx
 ```
 
-It will:
-1. Show you the available columns and suggest which ones look like text
-2. Ask which columns to clean
-3. Ask which columns to drop
-4. Ask for an output filename
-5. Save the cleaned file
+The CLI walks you through column selection, cleaning options, and output filename interactively — no script needed.
 
-## What gets cleaned
+---
 
-`TextCleaner` applies the following steps, in order, to every text value:
+## Cleaning Pipeline
 
-| Step | What it does | Example |
+Every text value goes through these steps, in order:
+
+| Step | What it removes | Example |
 |---|---|---|
-| URLs | Removes `http(s)://...` links | `cek https://x.com` → `cek` |
-| pic.twitter.com links | Removes Twitter media links | `pic.twitter.com/xyz` → removed |
-| Mentions | Removes `@username` | `@admin halo` → `halo` |
-| Hashtags | Removes `#tagname` | `#trending banget` → `banget` |
-| Non-ASCII / emoji | Removes emojis and non-ASCII characters | `keren 🔥🔥` → `keren` |
-| Symbols | Removes punctuation and special characters | `wow!!!` → `wow` |
-| Numbers | Removes digits | `top10` → `top` |
-| Repeated characters | Collapses 3+ repeated letters into one | `ayoooo` → `ayo` |
-| Newlines | Converts `\n` into a space | |
-| Extra whitespace | Collapses multiple spaces into one | |
-| Lowercasing | Converts everything to lowercase | |
+| URLs | `http(s)://...` links | `cek https://x.com` → `cek` |
+| Twitter media | `pic.twitter.com/...` links | removed entirely |
+| Mentions | `@username` | `@admin halo` → `halo` |
+| Hashtags | `#tagname` | `#trending banget` → `banget` |
+| Emoji / non-ASCII | Emojis and non-ASCII characters | `keren 🔥` → `keren` |
+| Symbols | Punctuation and special characters | `wow!!!` → `wow` |
+| Numbers | Digits | `top10` → `top` |
+| Repeated chars | 3+ repeated letters collapsed | `ayoooo` → `ayo` |
+| Whitespace | Newlines and extra spaces normalized | |
+| Lowercase | Full lowercasing | `MANTAP` → `mantap` |
 
-## Using individual components
+---
 
-Each class can also be used on its own if you only need part of the pipeline.
+## Individual Components
 
-**Just load a file:**
+Each class works standalone if you only need part of the pipeline.
+
 ```python
+# Load a file
 from textcleaner import DocumentLoader
-
 df = DocumentLoader("data.xlsx").load()
-```
 
-**Just clean a single string:**
-```python
+# Clean a single string
 from textcleaner import TextCleaner
-
 TextCleaner.clean("Ayooooo cek https://link.com @admin 🔥")
-# -> "ayo cek"
-```
+# → "ayo cek"
 
-**Just manage columns:**
-```python
+# Manage columns
 from textcleaner import ColumnCleaner
-
 cc = ColumnCleaner(df)
-cc.suggest_text_columns()          # guess which columns are text
-df = cc.drop_columns(["user_id"])  # drop unwanted columns
+cc.suggest_text_columns()
+df = cc.drop_columns(["user_id"])
 ```
 
-## `CleaningPipeline.run()` options
+---
 
-| Parameter | Type | Description |
-|---|---|---|
-| `text_columns` | `list[str]` | Columns whose text will be cleaned (required) |
-| `drop_columns` | `list[str]` | Columns to remove before cleaning (optional) |
-| `output_path` | `str` | Output file path — supports `.xlsx` or `.csv` (default: `"cleaned.xlsx"`) |
-| `overwrite_original` | `bool` | If `True`, overwrites the original column instead of creating a `<column>_cleaned` copy (default: `False`) |
-| `save` | `bool` | If `True`, automatically saves the result to `output_path` (default: `True`) |
+## `CleaningPipeline.run()` Options
 
-## What this library is NOT for
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `text_columns` | `list[str]` | required | Columns to clean |
+| `drop_columns` | `list[str]` | `[]` | Columns to remove before cleaning |
+| `output_path` | `str` | `"cleaned.xlsx"` | Output path — `.xlsx` or `.csv` |
+| `overwrite_original` | `bool` | `False` | Overwrite original column instead of creating `_cleaned` copy |
+| `save` | `bool` | `True` | Auto-save result to `output_path` |
 
-- It doesn't do language-aware normalization (e.g. turning slang like `gk`, `ga`, `nggak` into `tidak`) — that requires a dictionary-based or NLP approach on top of this
-- It doesn't do sentiment analysis, tokenization, or stemming itself — it's meant as the **preprocessing step before** those tasks
-- It's not built for LLM-based cleaning — the regex approach here is fast and free for structural noise; LLMs are better reserved for meaning-level tasks like slang normalization or classification
+---
 
-## Roadmap ideas
+## Project Structure
 
-- Indonesian slang-word normalization via dictionary lookup
-- Optional stopword removal (e.g. via Sastrawi for Bahasa Indonesia)
+```
+doc2cleaner/
+├── pyproject.toml
+├── cli.py                  ← Interactive CLI
+└── textcleaner/
+    ├── __init__.py         ← Public exports
+    ├── loader.py           ← DocumentLoader
+    ├── columns.py          ← ColumnCleaner
+    ├── cleaner.py          ← TextCleaner
+    └── pipeline.py         ← CleaningPipeline
+```
+
+---
+
+## What This Is Not
+
+- **Not a slang normalizer** — converting `gk`, `ga`, `nggak` → `tidak` requires a dictionary-based approach on top of this
+- **Not an NLP engine** — no sentiment analysis, tokenization, or stemming; this is the preprocessing step *before* those tasks
+- **Not LLM-based** — regex is fast and free for structural noise; LLMs are better reserved for meaning-level tasks
+
+---
+
+## Roadmap
+
+- Indonesian slang normalization via dictionary lookup
+- Optional stopword removal (Sastrawi support)
 - Optional stemming
-- Batch processing for multiple files at once
+- Batch processing for multiple files
+
+---
+
+## License
+
+MIT: [LICENSE](LICENSE)
+
+---
+
+<p align="center"><em>"Clean data in. Better models out."</em></p>
